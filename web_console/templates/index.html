@@ -601,6 +601,13 @@
             <p>{{ t.docs_intro_desc }}</p>
           </div>
           <div class="doc-block">
+            <h3>{{ t.docs_auth_title }}</h3>
+            <p>{{ t.docs_auth_desc }}</p>
+            <pre class="doc-pre">Authorization: Bearer YOUR_API_KEY
+X-API-Key: YOUR_API_KEY
+GET {{ api_base_url }}/api/v1/tasks?api_key=YOUR_API_KEY</pre>
+          </div>
+          <div class="doc-block">
             <h3>{{ t.docs_endpoints_title }}</h3>
             <table class="doc-table">
               <thead>
@@ -630,6 +637,85 @@
             </table>
           </div>
           <div class="doc-block">
+            <h3>{{ t.docs_v1_endpoints_title }}</h3>
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>{{ t.table_method }}</th>
+                  <th>{{ t.table_path }}</th>
+                  <th>{{ t.table_desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/task-templates</code></td>
+                  <td>{{ t.endpoint_v1_templates_list_desc }}</td>
+                </tr>
+                <tr>
+                  <td>POST</td>
+                  <td><code>/api/v1/task-templates</code></td>
+                  <td>{{ t.endpoint_v1_templates_create_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/task-templates/{template_id}</code></td>
+                  <td>{{ t.endpoint_v1_template_detail_desc }}</td>
+                </tr>
+                <tr>
+                  <td>PATCH</td>
+                  <td><code>/api/v1/task-templates/{template_id}</code></td>
+                  <td>{{ t.endpoint_v1_template_update_desc }}</td>
+                </tr>
+                <tr>
+                  <td>POST</td>
+                  <td><code>/api/v1/task-templates/{template_id}/enqueue</code></td>
+                  <td>{{ t.endpoint_v1_template_enqueue_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/tasks</code></td>
+                  <td>{{ t.endpoint_v1_tasks_list_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/tasks/{task_id}</code></td>
+                  <td>{{ t.endpoint_v1_task_detail_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/tasks/{task_id}/console?cursor=0</code></td>
+                  <td>{{ t.endpoint_v1_task_console_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/tasks/{task_id}/artifacts</code></td>
+                  <td>{{ t.endpoint_v1_task_artifacts_desc }}</td>
+                </tr>
+                <tr>
+                  <td>POST</td>
+                  <td><code>/api/v1/tasks/{task_id}/retry</code></td>
+                  <td>{{ t.endpoint_v1_task_retry_desc }}</td>
+                </tr>
+                <tr>
+                  <td>POST</td>
+                  <td><code>/api/v1/tasks/{task_id}/stop</code></td>
+                  <td>{{ t.endpoint_v1_task_stop_desc }}</td>
+                </tr>
+                <tr>
+                  <td>DELETE</td>
+                  <td><code>/api/v1/tasks/{task_id}</code></td>
+                  <td>{{ t.endpoint_v1_task_delete_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/v1/tasks/{task_id}/download</code></td>
+                  <td>{{ t.endpoint_v1_task_download_desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-block">
             <h3>{{ t.docs_create_params_title }}</h3>
             <table class="doc-table">
               <thead>
@@ -642,22 +728,46 @@
               </thead>
               <tbody>
                 <tr>
+                  <td><code>template_id</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_template_id_desc }}</td>
+                </tr>
+                <tr>
                   <td><code>platform</code></td>
                   <td>string</td>
-                  <td>{{ t.required_yes }}</td>
+                  <td>{{ t.required_conditional }}</td>
                   <td>{{ t.param_platform_desc }}</td>
                 </tr>
                 <tr>
                   <td><code>quantity</code></td>
                   <td>integer</td>
-                  <td>{{ t.required_yes }}</td>
+                  <td>{{ t.required_conditional }}</td>
                   <td>{{ t.param_quantity_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>count</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_count_desc }}</td>
                 </tr>
                 <tr>
                   <td><code>use_proxy</code></td>
                   <td>boolean</td>
                   <td>{{ t.required_no }}</td>
                   <td>{{ t.param_use_proxy_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>proxy_mode</code></td>
+                  <td>string</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_proxy_mode_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>proxy_id</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_proxy_id_desc }}</td>
                 </tr>
                 <tr>
                   <td><code>concurrency</code></td>
@@ -671,6 +781,24 @@
                   <td>{{ t.required_no }}</td>
                   <td>{{ t.param_name_desc }}</td>
                 </tr>
+                <tr>
+                  <td><code>captcha_credential_id</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_captcha_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>email_credential_ids</code></td>
+                  <td>integer[]</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_email_credentials_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>cpa_credential_id</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_cpa_desc }}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -683,13 +811,22 @@ Content-Type: application/json
 {
   "platform": "openai-register",
   "quantity": 10,
-  "use_proxy": true,
-  "concurrency": 1
+  "proxy_mode": "default",
+  "concurrency": 3,
+  "email_credential_ids": [1, 2]
 }</pre>
             <pre class="doc-pre">curl -X POST "{{ api_base_url }}/api/external/tasks" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d "{\"platform\":\"openai-register\",\"quantity\":10,\"use_proxy\":true,\"concurrency\":1}"</pre>
+  -d "{\"platform\":\"openai-register\",\"quantity\":10,\"proxy_mode\":\"default\",\"concurrency\":3,\"email_credential_ids\":[1,2]}"</pre>
+            <pre class="doc-pre">POST {{ api_base_url }}/api/external/tasks
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "template_id": 5,
+  "count": 3
+}</pre>
           </div>
           <div class="doc-block">
             <h3>{{ t.docs_query_example_title }}</h3>
@@ -702,15 +839,33 @@ Authorization: Bearer YOUR_API_KEY</pre>
   "status": "running",
   "completed_count": 4,
   "target_quantity": 10,
-  "auto_delete_at": "2026-03-16 20:15:00",
-  "download_url": null
+  "auto_delete_at": "2026-03-26 20:15:00",
+  "download_url": null,
+  "available_actions": ["stop"],
+  "runtime": {
+    "progress": {
+      "done": 6,
+      "total": 10,
+      "success": 4,
+      "failed": 2
+    },
+    "heartbeat_at": "2026-03-26 19:55:41",
+    "console_bytes": 18342,
+    "artifacts": {
+      "has_archive": false
+    }
+  },
+  "template_id": null,
+  "template_name": null
 }</pre>
           </div>
           <div class="doc-block">
             <h3>{{ t.docs_download_example_title }}</h3>
-            <pre class="doc-pre">GET {{ api_base_url }}/api/external/tasks/TASK_ID/download
+            <pre class="doc-pre">GET {{ api_base_url }}/api/v1/tasks?status=running&source=api&limit=20
 Authorization: Bearer YOUR_API_KEY</pre>
-            <pre class="doc-pre">curl -L "{{ api_base_url }}/api/external/tasks/TASK_ID/download" \
+            <pre class="doc-pre">GET {{ api_base_url }}/api/v1/tasks/TASK_ID/console?cursor=1200
+Authorization: Bearer YOUR_API_KEY</pre>
+            <pre class="doc-pre">curl -L "{{ api_base_url }}/api/v1/tasks/TASK_ID/download" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -o result.zip</pre>
           </div>
