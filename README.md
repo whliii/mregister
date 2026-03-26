@@ -18,7 +18,7 @@
 
 - [mail_adapter/GMAIL_RELAY_README.md](mail_adapter/GMAIL_RELAY_README.md)：Gmail relay 临时邮箱服务说明
 - [openai-register/README.md](openai-register/README.md)：OpenAI 注册端说明
-- [grok-register/README.md](grok-register/README.md)：Grok 注册端说明
+- [grok-register/README.md](grok-register/README.md)：Grok 注册端说明(已废弃)
 - [docker-compose.yml](docker-compose.yml)：根目录控制台服务编排
 
 ## 快速开始
