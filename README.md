@@ -1,66 +1,66 @@
 # mregister
 
-`mregister` is a registration toolkit built around a temporary mailbox service and a web console.
+`mregister` 是一个围绕临时邮箱服务和网页控制台组织起来的注册工具集。
 
-It consists of three main parts:
+仓库主要由三部分组成：
 
-- `mail_adapter/`: temporary mailbox service with a GPTMail-compatible API
-- `openai-register/` and `grok-register/`: registration workers
-- `web_console/`: web UI for credentials, proxies, templates, and task execution
+- `mail_adapter/`：临时邮箱服务，提供 GPTMail 兼容 API
+- `openai-register/` 和 `grok-register/`：注册执行端
+- `web_console/`：用于管理凭据、代理、模板和任务的网页控制台
 
-## Architecture
+## 架构关系
 
-Typical flow:
+常见使用链路：
 
-`mail_adapter` -> mailbox / OTP API -> `openai-register` or `grok-register` -> `web_console` for orchestration
+`mail_adapter` -> 邮箱 / 验证码接口 -> `openai-register` 或 `grok-register` -> `web_console` 统一调度
 
-## Repository Layout
+## 目录说明
 
-- [mail_adapter/GMAIL_RELAY_README.md](mail_adapter/GMAIL_RELAY_README.md): Gmail relay mailbox service
-- [openai-register/README.md](openai-register/README.md): OpenAI registration worker
-- [grok-register/README.md](grok-register/README.md): Grok registration worker
-- [docker-compose.yml](docker-compose.yml): web console stack
+- [mail_adapter/GMAIL_RELAY_README.md](mail_adapter/GMAIL_RELAY_README.md)：Gmail relay 临时邮箱服务说明
+- [openai-register/README.md](openai-register/README.md)：OpenAI 注册端说明
+- [grok-register/README.md](grok-register/README.md)：Grok 注册端说明
+- [docker-compose.yml](docker-compose.yml)：根目录控制台服务编排
 
-## Quick Start
+## 快速开始
 
-Start the mailbox service first:
+先启动临时邮箱服务：
 
 ```bash
 cd /home/ubuntu/mregister/mail_adapter
 docker compose up -d --build
 ```
 
-Default endpoints:
+默认地址：
 
-- GPTMail-compatible API: `http://127.0.0.1:18787`
-- Admin console: `http://127.0.0.1:18787/admin/console`
+- GPTMail 兼容 API：`http://127.0.0.1:18787`
+- 管理后台：`http://127.0.0.1:18787/admin/console`
 
-Then start the web console from the repository root:
+再从仓库根目录启动网页控制台：
 
 ```bash
 cd /home/ubuntu/mregister
 docker compose up -d --build
 ```
 
-Web console:
+控制台地址：
 
 - `http://127.0.0.1:8000`
 
-## Notes
+## 使用说明
 
-- Root `docker-compose.yml` starts `web_console`, not `mail_adapter`
-- `mail_adapter/docker-compose.yml` starts the mailbox backend
-- The registration workers depend on a working mailbox service
+- 根目录 `docker-compose.yml` 启动的是 `web_console`，不是 `mail_adapter`
+- `mail_adapter/docker-compose.yml` 才是临时邮箱后台
+- 注册执行端依赖可用的邮箱服务，没有邮箱服务时任务无法正常运行
 
-## Local Secrets
+## 本地敏感数据
 
-This repository is prepared for public source control.
+这个仓库已经按公开代码仓库的方式处理过。
 
-The following local data is intentionally excluded from Git:
+以下本地数据默认不会进入 Git：
 
-- `.env` files
-- SQLite databases
-- runtime logs and task output
-- local credentials and mailbox state
+- `.env` 文件
+- SQLite 数据库
+- 运行日志和任务输出
+- 本地凭据与邮箱状态数据
 
-Examples are provided via environment templates such as [mail_adapter/.env.example](mail_adapter/.env.example).
+示例环境变量可参考 [mail_adapter/.env.example](mail_adapter/.env.example)。
