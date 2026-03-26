@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="{{ ui_lang }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ t.site_title }}</title>
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/static/app.css?v={{ app_css_version }}">
+</head>
+<body>
+  {% if auth_view != "app" %}
+  <main class="auth-page">
+    <section class="auth-card">
+      <p class="eyebrow">{{ t.brand_name }}</p>
+      {% if auth_view == "setup" %}
+      <h1>{{ t.auth_setup_title }}</h1>
+      <p class="subtle">{{ t.auth_setup_desc }}</p>
+      <form id="setup-form" class="stack auth-form">
+        <label>
+          <span>{{ t.auth_password }}</span>
+          <input type="password" name="password" minlength="8" required>
+        </label>
+        <button type="submit">{{ t.auth_setup_submit }}</button>
+      </form>
+      {% else %}
+      <h1>{{ t.auth_login_title }}</h1>
+      <p class="subtle">{{ t.auth_login_desc }}</p>
+      <form id="login-form" class="stack auth-form">
+        <label>
+          <span>{{ t.auth_password }}</span>
+          <input type="password" name="password" minlength="8" required>
+        </label>
+        <button type="submit">{{ t.auth_login_submit }}</button>
+      </form>
+      {% endif %}
+      <p id="auth-error" class="auth-error"></p>
+    </section>
+  </main>
+  <script>
+    const authError = document.getElementById('auth-error');
+
+    async function submitAuth(path, form) {
+      authError.textContent = '';
+      const payload = Object.fromEntries(new FormData(form).entries());
+      const response = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({ detail: {{ t.request_failed|tojson }} }));
+        throw new Error(data.detail || {{ t.request_failed|tojson }});
+      }
+      window.location.reload();
+    }
+
+    const setupForm = document.getElementById('setup-form');
+    const loginForm = document.getElementById('login-form');
+
+    if (setupForm) {
+      setupForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        try {
+          await submitAuth('/api/auth/setup', setupForm);
+        } catch (error) {
+          authError.textContent = error.message;
+        }
+      });
+    }
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        try {
+          await submitAuth('/api/auth/login', loginForm);
+        } catch (error) {
+          authError.textContent = error.message;
+        }
+      });
+    }
+  </script>
+  {% else %}
+  <div class="admin-shell" id="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <div class="brand-copy">
+            <p class="eyebrow">{{ t.brand_console }}</p>
+            <h1>{{ t.brand_name }}</h1>
+          </div>
+        </div>
+        <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-label="{{ t.toggle_sidebar }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-section="dashboard" data-label="{{ t.nav_dashboard }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 12l8-7 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 10v9h10v-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_dashboard }}</span>
+        </button>
+        <button class="nav-btn" data-section="credentials" data-label="{{ t.nav_credentials }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="5" width="16" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M8 10h8M8 14h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_credentials }}</span>
+        </button>
+        <button class="nav-btn" data-section="proxies" data-label="{{ t.nav_proxies }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M5 12h14M12 5a12 12 0 0 1 0 14M12 5a12 12 0 0 0 0 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_proxies }}</span>
+        </button>
+        <button class="nav-btn" data-section="create-task" data-label="{{ t.nav_create_task }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_create_task }}</span>
+        </button>
+        <button class="nav-btn" data-section="template-center" data-label="{{ t.nav_template_center }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 5h12a1 1 0 0 1 1 1v12l-3-2-3 2-3-2-3 2V6a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_template_center }}</span>
+        </button>
+        <button class="nav-btn" data-section="task-detail" data-label="{{ t.nav_task_detail }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="4" width="14" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M9 9h6M9 13h6M9 17h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_task_detail }}</span>
+        </button>
+        <button class="nav-btn" data-section="api-keys" data-label="{{ t.nav_api_keys }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 11a4 4 0 1 1 6.9 2.8L13 16h-3v-2h2l1-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_api_keys }}</span>
+        </button>
+        <button class="nav-btn" data-section="docs" data-label="{{ t.nav_docs }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 5h8l3 3v11H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M15 5v4h4M10 13h4M10 17h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_docs }}</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" id="logout-btn" class="sidebar-logout" data-label="{{ t.nav_logout }}">
+          <span class="nav-btn__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10 17l-5-5 5-5M5 12h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 5h4v14h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-btn__label">{{ t.nav_logout }}</span>
+        </button>
+      </div>
+    </aside>
+
+    <button type="button" id="sidebar-overlay" class="sidebar-overlay" aria-label="{{ t.close_sidebar }}"></button>
+
+    <main class="content-shell">
+      <div class="content-topbar">
+        <button type="button" id="mobile-nav-btn" class="mobile-nav-btn" aria-label="{{ t.open_sidebar }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="content-topbar-copy">
+          <p class="eyebrow">{{ t.topbar_workspace }}</p>
+          <strong id="section-indicator">{{ t.nav_dashboard }}</strong>
+        </div>
+      </div>
+
+      <section id="section-dashboard" class="section-card active">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_dashboard }}</p>
+            <h2>{{ t.section_overview }}</h2>
+          </div>
+        </div>
+        <div id="dashboard-metrics" class="metric-grid"></div>
+        <div class="panel compact">
+          <div class="panel-head">
+            <div>
+              <h3>{{ t.panel_defaults_title }}</h3>
+              <span>{{ t.panel_defaults_desc }}</span>
+            </div>
+          </div>
+          <form id="defaults-form" class="grid-two form-grid">
+            <label class="field-card">
+              <span>{{ t.default_yescaptcha }}</span>
+              <select id="default-yescaptcha" name="default_yescaptcha_credential_id"></select>
+            </label>
+            <label class="field-card">
+              <span>{{ t.default_proxy }}</span>
+              <select id="default-proxy" name="default_proxy_id"></select>
+            </label>
+            <div class="form-actions">
+              <button type="submit">{{ t.save_defaults }}</button>
+            </div>
+          </form>
+        </div>
+        <div class="panel compact">
+          <div class="panel-head">
+            <div>
+              <h3>{{ t.panel_recent_tasks_title }}</h3>
+              <span>{{ t.panel_recent_tasks_desc }}</span>
+            </div>
+          </div>
+          <div id="dashboard-tasks" class="simple-list"></div>
+        </div>
+      </section>
+
+      <section id="section-credentials" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_credentials }}</p>
+            <h2>{{ t.section_credentials }}</h2>
+          </div>
+        </div>
+        <div class="grid-two">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>{{ t.credentials_create_title }}</h3>
+                <span>{{ t.credentials_create_desc }}</span>
+              </div>
+            </div>
+            <form id="credential-form" class="stack">
+              <label class="field-card">
+                <span>{{ t.field_name }}</span>
+                <input name="name" placeholder="gptmail-main" required>
+              </label>
+              <label class="field-card">
+                <span>{{ t.field_kind }}</span>
+                <select name="kind" id="credential-kind">
+                  <option value="gptmail">GPTMail</option>
+                  <option value="duckmail">DuckMail</option>
+                  <option value="tempmail_lol">TempMail.lol</option>
+                  <option value="cfmail">CFMail</option>
+                  <option value="mail_tm">Mail.tm</option>
+                  <option value="mail_gw">Mail.gw</option>
+                  <option value="yescaptcha">YesCaptcha</option>
+                  <option value="cpa">CPA Platform</option>
+                </select>
+              </label>
+              <label class="field-card">
+                <span id="api-key-label">{{ t.field_api_key }}</span>
+                <input name="api_key" id="credential-api-key" placeholder="API Key" required>
+              </label>
+              <label id="base-url-field" class="field-card">
+                <span id="base-url-label">{{ t.field_base_url }}</span>
+                <input name="base_url" placeholder="https://mail.chatgpt.org.uk">
+              </label>
+              <label id="prefix-field" class="field-card">
+                <span>{{ t.field_prefix }}</span>
+                <input name="prefix" placeholder="Optional">
+              </label>
+              <label id="domain-field" class="field-card">
+                <span>{{ t.field_domain }}</span>
+                <input name="domain" placeholder="Optional">
+              </label>
+              <label class="field-card">
+                <span>{{ t.field_notes }}</span>
+                <textarea name="notes" rows="3" placeholder="Optional"></textarea>
+              </label>
+              <button type="submit">{{ t.save_credential }}</button>
+            </form>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>{{ t.credentials_saved_title }}</h3>
+                <span>{{ t.credentials_saved_desc }}</span>
+              </div>
+            </div>
+            <div id="credentials-list" class="entity-list"></div>
+          </article>
+        </div>
+        <article class="panel dispatch-hub-panel">
+          <div class="panel-head">
+            <div>
+              <h3>{{ t.dispatch_center_title }}</h3>
+              <span>{{ t.dispatch_center_desc }}</span>
+            </div>
+          </div>
+          <div id="dispatch-center-metrics" class="dispatch-overview-grid"></div>
+          <div id="dispatch-center-list" class="dispatch-center-list"></div>
+        </article>
+      </section>
+
+      <section id="section-proxies" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_proxies }}</p>
+            <h2>{{ t.section_proxies }}</h2>
+          </div>
+        </div>
+
+        <!-- 代理选项卡 -->
+        <div class="proxy-tabs">
+          <button type="button" class="proxy-tab active" data-tab="external">{{ t.proxy_tab_external }}</button>
+          <button type="button" class="proxy-tab" data-tab="subscription">{{ t.proxy_tab_subscription }}</button>
+        </div>
+
+        <!-- 外部代理面板 -->
+        <div id="proxy-panel-external" class="proxy-panel active">
+          <div class="grid-two">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>{{ t.proxies_create_title }}</h3>
+                  <span>{{ t.proxies_create_desc }}</span>
+                </div>
+              </div>
+              <form id="proxy-form" class="stack">
+                <label class="field-card">
+                  <span>{{ t.field_name }}</span>
+                  <input name="name" placeholder="hk-proxy-1" required>
+                </label>
+                <label class="field-card">
+                  <span>{{ t.field_proxy_url }}</span>
+                  <input name="proxy_url" placeholder="http://127.0.0.1:7890" required>
+                </label>
+                <label class="field-card">
+                  <span>{{ t.field_notes }}</span>
+                  <textarea name="notes" rows="3" placeholder="Optional"></textarea>
+                </label>
+                <button type="submit">{{ t.save_proxy }}</button>
+              </form>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>{{ t.proxies_saved_title }}</h3>
+                  <span>{{ t.proxies_saved_desc }}</span>
+                </div>
+              </div>
+              <div id="proxy-list" class="entity-list"></div>
+            </article>
+          </div>
+        </div>
+
+        <!-- 订阅代理面板 -->
+        <div id="proxy-panel-subscription" class="proxy-panel">
+          <div class="grid-two">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>{{ t.subscription_add_title }}</h3>
+                  <span>{{ t.subscription_add_desc }}</span>
+                </div>
+              </div>
+              <form id="subscription-form" class="stack">
+                <label class="field-card">
+                  <span>{{ t.field_name }}</span>
+                  <input name="name" placeholder="My Subscription" required>
+                </label>
+                <label class="field-card">
+                  <span>{{ t.field_subscription_url }}</span>
+                  <input name="url" placeholder="https://example.com/subscribe" required>
+                </label>
+                <label class="field-card">
+                  <span>{{ t.field_notes }}</span>
+                  <textarea name="notes" rows="2" placeholder="Optional"></textarea>
+                </label>
+                <button type="submit">{{ t.add_subscription }}</button>
+              </form>
+
+              <!-- 订阅列表 -->
+              <div class="subscription-list-header">
+                <h3>{{ t.subscriptions_title }}</h3>
+              </div>
+              <div id="subscription-list" class="entity-list"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <h3>{{ t.proxy_nodes_title }}</h3>
+                  <span>{{ t.proxy_nodes_desc }}</span>
+                </div>
+              </div>
+              <div id="proxy-nodes-list" class="entity-list proxy-nodes-list"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-create-task" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_create_task }}</p>
+            <h2>{{ t.section_tasks }}</h2>
+          </div>
+        </div>
+        <article class="panel">
+          <form id="task-form" class="grid-two form-grid">
+            <label class="field-card">
+              <span>{{ t.field_task_name }}</span>
+              <input name="name" placeholder="openai register 50" required>
+            </label>
+            <label class="field-card">
+              <span>{{ t.field_platform }}</span>
+              <select name="platform" id="platform-select">
+                {% for key, item in platforms.items() %}
+                <option value="{{ key }}">{{ item.label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="field-card">
+              <span>{{ t.field_quantity }}</span>
+              <input type="number" min="1" max="100000" name="quantity" value="1" required>
+            </label>
+            <label id="concurrency-field" class="field-card">
+              <span>{{ t.field_concurrency }}</span>
+              <input type="number" min="1" max="64" name="concurrency" value="3">
+            </label>
+            <!-- 邮箱凭证多选 -->
+            <div id="mail-providers-container" class="field-card full-row">
+              <span>邮箱凭证（可多选）</span>
+              <div id="mail-providers-list" class="mail-providers-list"></div>
+              <div id="selected-providers" class="selected-providers"></div>
+            </div>
+            <!-- CPA 凭据选择 -->
+            <label id="cpa-select-field" class="field-card">
+              <span>CPA 平台上传</span>
+              <select name="cpa_credential_id" id="cpa-select">
+                <option value="">不上传</option>
+              </select>
+            </label>
+            <label id="captcha-select-field" class="field-card">
+              <span>{{ t.field_captcha_credential }}</span>
+              <select name="captcha_credential_id" id="captcha-select"></select>
+            </label>
+            <label class="field-card">
+              <span>{{ t.field_proxy_mode }}</span>
+              <select name="proxy_mode" id="proxy-mode-select">
+                <option value="none">{{ t.proxy_mode_none }}</option>
+                <option value="default">{{ t.proxy_mode_default }}</option>
+                <option value="custom">{{ t.proxy_mode_custom }}</option>
+                <option value="rotate">{{ t.proxy_mode_rotate }}</option>
+              </select>
+            </label>
+            <label id="proxy-select-field" class="field-card">
+              <span>{{ t.field_proxy_select }}</span>
+              <select name="proxy_id" id="proxy-select"></select>
+            </label>
+            <div class="form-actions full-row">
+              <button type="submit">{{ t.save_task }}</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <section id="section-template-center" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_template_center }}</p>
+            <h2>{{ t.section_templates }}</h2>
+          </div>
+        </div>
+        <div class="detail-layout">
+          <aside class="task-side-wrap">
+            <article class="panel task-side-panel">
+              <div class="panel-head panel-head--stack">
+                <div>
+                  <h3>{{ t.template_list_title }}</h3>
+                  <span>{{ t.template_list_desc }}</span>
+                </div>
+              </div>
+              <aside id="template-list" class="task-side-list"></aside>
+            </article>
+          </aside>
+          <article class="panel task-detail-panel">
+            <div id="template-detail-header" class="task-detail-header"></div>
+            <div id="template-detail-actions" class="task-actions"></div>
+            <div id="template-detail-meta" class="simple-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="section-task-detail" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_task_detail }}</p>
+            <h2>{{ t.section_task_detail }}</h2>
+          </div>
+        </div>
+        <div class="detail-layout">
+          <aside class="task-side-wrap">
+            <article class="panel task-side-panel">
+              <div class="panel-head panel-head--stack">
+                <div>
+                  <h3>{{ t.task_list_title }}</h3>
+                  <span>{{ t.task_list_desc }}</span>
+                </div>
+              </div>
+              <div class="task-filter-bar">
+                <label class="field-card field-card--compact">
+                  <span>{{ t.task_filter_status }}</span>
+                  <select id="task-filter-status">
+                    <option value="all">{{ t.task_filter_all }}</option>
+                    <option value="queued">queued</option>
+                    <option value="running">running</option>
+                    <option value="stopping">stopping</option>
+                    <option value="completed">completed</option>
+                    <option value="partial">partial</option>
+                    <option value="failed">failed</option>
+                    <option value="stopped">stopped</option>
+                    <option value="interrupted">interrupted</option>
+                  </select>
+                </label>
+              </div>
+              <aside id="task-list" class="task-side-list"></aside>
+            </article>
+          </aside>
+          <article class="panel task-detail-panel">
+            <div id="task-detail-header" class="task-detail-header"></div>
+            <div id="task-detail-actions" class="task-actions"></div>
+            <div class="console-box large-console">
+              <div class="console-title">{{ t.console_title }}</div>
+              <pre id="task-console">{{ t.console_wait }}</pre>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="section-api-keys" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_api_keys }}</p>
+            <h2>{{ t.section_api }}</h2>
+          </div>
+        </div>
+        <div class="grid-two">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>{{ t.api_create_title }}</h3>
+                <span>{{ t.api_create_desc }}</span>
+              </div>
+            </div>
+            <form id="api-key-form" class="stack">
+              <label class="field-card">
+                <span>{{ t.field_name }}</span>
+                <input name="name" placeholder="internal-bot" required>
+              </label>
+              <button type="submit">{{ t.save_api_key }}</button>
+            </form>
+            <div id="api-key-created" class="api-key-created"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <h3>{{ t.api_saved_title }}</h3>
+                <span>{{ t.api_saved_desc }}</span>
+              </div>
+            </div>
+            <div id="api-key-list" class="entity-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="section-docs" class="section-card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">{{ t.nav_docs }}</p>
+            <h2>{{ t.section_docs }}</h2>
+          </div>
+        </div>
+        <article class="panel">
+          <div class="doc-block">
+            <h3>{{ t.docs_intro_title }}</h3>
+            <p>{{ t.docs_intro_desc }}</p>
+          </div>
+          <div class="doc-block">
+            <h3>{{ t.docs_endpoints_title }}</h3>
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>{{ t.table_method }}</th>
+                  <th>{{ t.table_path }}</th>
+                  <th>{{ t.table_desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>POST</td>
+                  <td><code>/api/external/tasks</code></td>
+                  <td>{{ t.endpoint_create_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/external/tasks/{task_id}</code></td>
+                  <td>{{ t.endpoint_query_desc }}</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/api/external/tasks/{task_id}/download</code></td>
+                  <td>{{ t.endpoint_download_desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-block">
+            <h3>{{ t.docs_create_params_title }}</h3>
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th>{{ t.table_field }}</th>
+                  <th>{{ t.table_type }}</th>
+                  <th>{{ t.table_required }}</th>
+                  <th>{{ t.table_desc }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>platform</code></td>
+                  <td>string</td>
+                  <td>{{ t.required_yes }}</td>
+                  <td>{{ t.param_platform_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>quantity</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_yes }}</td>
+                  <td>{{ t.param_quantity_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>use_proxy</code></td>
+                  <td>boolean</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_use_proxy_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>concurrency</code></td>
+                  <td>integer</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_concurrency_desc }}</td>
+                </tr>
+                <tr>
+                  <td><code>name</code></td>
+                  <td>string</td>
+                  <td>{{ t.required_no }}</td>
+                  <td>{{ t.param_name_desc }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-block">
+            <h3>{{ t.docs_create_example_title }}</h3>
+            <pre class="doc-pre">POST {{ api_base_url }}/api/external/tasks
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+
+{
+  "platform": "openai-register",
+  "quantity": 10,
+  "use_proxy": true,
+  "concurrency": 1
+}</pre>
+            <pre class="doc-pre">curl -X POST "{{ api_base_url }}/api/external/tasks" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"platform\":\"openai-register\",\"quantity\":10,\"use_proxy\":true,\"concurrency\":1}"</pre>
+          </div>
+          <div class="doc-block">
+            <h3>{{ t.docs_query_example_title }}</h3>
+            <pre class="doc-pre">GET {{ api_base_url }}/api/external/tasks/TASK_ID
+Authorization: Bearer YOUR_API_KEY</pre>
+            <pre class="doc-pre">curl "{{ api_base_url }}/api/external/tasks/TASK_ID" \
+  -H "Authorization: Bearer YOUR_API_KEY"</pre>
+            <pre class="doc-pre">{
+  "task_id": 12,
+  "status": "running",
+  "completed_count": 4,
+  "target_quantity": 10,
+  "auto_delete_at": "2026-03-16 20:15:00",
+  "download_url": null
+}</pre>
+          </div>
+          <div class="doc-block">
+            <h3>{{ t.docs_download_example_title }}</h3>
+            <pre class="doc-pre">GET {{ api_base_url }}/api/external/tasks/TASK_ID/download
+Authorization: Bearer YOUR_API_KEY</pre>
+            <pre class="doc-pre">curl -L "{{ api_base_url }}/api/external/tasks/TASK_ID/download" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -o result.zip</pre>
+          </div>
+          <div class="doc-block">
+            <h3>{{ t.docs_response_title }}</h3>
+            <p>{{ t.docs_response_desc }}</p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <template id="entity-template">
+    <article class="entity-card">
+      <div>
+        <h3></h3>
+        <p class="meta"></p>
+        <div class="notes"></div>
+      </div>
+      <div class="entity-actions"></div>
+    </article>
+  </template>
+
+  <script>
+    window.__APP_CONFIG__ = {
+      apiBaseUrl: "{{ api_base_url }}",
+      uiLang: "{{ ui_lang }}",
+      translations: {{ translations_json|safe }},
+    };
+  </script>
+  <script src="/static/app.js?v={{ app_js_version }}"></script>
+  {% endif %}
+</body>
+</html>

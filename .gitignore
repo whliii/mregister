@@ -1,0 +1,39 @@
+.alma-snapshots/
+.vscode/
+__pycache__/
+*.py[cod]
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases and journals
+*.db
+*.db-*
+*.sqlite
+*.sqlite*
+
+# Logs and runtime artifacts
+*.log
+tmp_email_smoke_output/
+tmp_mregister_email_smoke_credentials.json
+tmp_*.py
+
+# Keep runtime/data directories in git, but not their contents
+mail_adapter/data/*
+!mail_adapter/data/.gitkeep
+!mail_adapter/data/adapter/
+mail_adapter/data/adapter/*
+!mail_adapter/data/adapter/.gitkeep
+
+web_console/runtime/*
+!web_console/runtime/.gitkeep
+!web_console/runtime/tasks/
+web_console/runtime/tasks/*
+!web_console/runtime/tasks/.gitkeep
+
+# Local working database at repo root
+web_console/app.db
